@@ -6,13 +6,17 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import UserLoginSerializer, UserSerializer, JournalEntrySerializer, CategorySerializer
 from .models import User, JournalEntry, Category
 from datetime import datetime, timedelta
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
-class UserLoginView(generics.CreateAPIView):
+class UserLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -32,6 +36,8 @@ class JournalEntryListCreateView(generics.ListCreateAPIView):
         return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise serializers.ValidationError("User is not authenticated.")
         serializer.save(user=self.request.user)
 
 class JournalEntryRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -51,6 +57,8 @@ class CategoryListCreateView(generics.ListCreateAPIView):
         return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise serializers.ValidationError("User is not authenticated.")
         serializer.save(user=self.request.user)
 
 class CategoryRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):

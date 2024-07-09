@@ -34,4 +34,12 @@ class CategorySerializer(serializers.ModelSerializer):
 class JournalEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalEntry
-        fields = ['id', 'title', 'content', 'category', 'date']
+        fields = '__all__'
+        read_only_fields = ['user']  
+
+    def create(self, validated_data):
+        request = self.context.get('request', None)
+        if request:
+            user = request.user
+            validated_data['user'] = user
+        return super().create(validated_data)

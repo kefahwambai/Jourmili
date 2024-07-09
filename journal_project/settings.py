@@ -74,6 +74,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'journal_project.wsgi.application'
 
+AUTH_USER_MODEL = 'journal.User'
+
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000",
 # ]
@@ -81,6 +83,7 @@ WSGI_APPLICATION = 'journal_project.wsgi.application'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
