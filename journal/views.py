@@ -1,14 +1,27 @@
-from rest_framework import generics, permissions
-from .models import JournalEntry, Category, User
-from .serializers import JournalEntrySerializer, CategorySerializer, UserSerializer
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status, permissions, generics
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count
+from .serializers import UserLoginSerializer, UserSerializer, JournalEntrySerializer, CategorySerializer
+from .models import User, JournalEntry, Category
 from datetime import datetime, timedelta
 
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
+
+class UserLoginView(generics.CreateAPIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class JournalEntryListCreateView(generics.ListCreateAPIView):
     queryset = JournalEntry.objects.all()
